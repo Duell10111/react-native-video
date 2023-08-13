@@ -15,6 +15,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _playerBufferEmpty:Bool = true
     private var _playerLayer:AVPlayerLayer?
     private var _chapters:[Chapter]?
+    private var _transportBarItems:[TransportBarItem]?
 
     private var _playerViewController:RCTVideoPlayerViewController?
     private var _videoURL:NSURL?
@@ -110,6 +111,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
+    @objc var onActionPress: RCTDirectEventBlock?
 
     init(eventDispatcher:RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
@@ -717,6 +719,59 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setChapters(_ chapters:[Chapter]?) {
         _chapters = chapters
     }
+    
+    @objc
+    func setTransportBarItems(_ transportBarItems:[NSDictionary]?) {
+        if #available(tvOS 15.0, *) {
+            let items = transportBarItems?.map({ dict in
+                if dict["children"] != nil {
+                    return TransportBarItem.barMenu(BarMenu(dict))
+                }
+                return TransportBarItem.barItem(BarAction(dict))
+            })
+            setTransportBarItems(items)
+        }
+    }
+
+    @available(tvOS 15.0, *)
+    func setTransportBarItems(_ transportBarItems:[TransportBarItem]?) {
+        _transportBarItems = transportBarItems
+        
+        let items = transportBarItems?.compactMap({ transportBar in
+            switch transportBar {
+            case .barItem(let barItem):
+                return createUIActionItem(barItem)
+            case .barMenu:
+                return nil
+            }
+        })
+        
+        _playerViewController?.transportBarCustomMenuItems = items ?? []
+        
+        print("Player View Controller nil ", _playerViewController == nil)
+    }
+    
+    @available(tvOS 15.0, *)
+    private func createUIActionItem(_ barItem: BarAction) -> UIAction {
+        let type = barItem.type ?? "press"
+        let image = UIImage(systemName: barItem.iconSystemName)
+        var activeImage: UIImage? = nil
+        if let activeIconName = barItem.activeIconSystemName {
+            print("Setting active image")
+            activeImage = UIImage(systemName: activeIconName)
+        }
+
+        let action = UIAction(title: barItem.title, image: image) {[weak self] action in
+            print("Action pressed")
+            if let aImage = activeImage {
+                action.image = aImage
+            }
+            self?.onActionPress?([
+                "title": barItem.title,
+            ])
+        }
+        return action
+    }
 
     @objc
     func setFullscreen(_ fullscreen:Bool) {
@@ -804,6 +859,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         _playerObserver.playerViewController = _playerViewController
+        
+        if #available(tvOS 15.0, *) {
+            setTransportBarItems(_transportBarItems ?? [])
+        }
     }
 
     func createPlayerViewController(player:AVPlayer, withPlayerItem playerItem:AVPlayerItem) -> RCTVideoPlayerViewController {

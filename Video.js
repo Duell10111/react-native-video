@@ -286,6 +286,12 @@ export default class Video extends Component {
     }
   };
 
+  _onActionPress = (event) => {
+    if (this.props.onActionPress) {
+      this.props.onActionPress(event.nativeEvent);
+    }
+  };
+
   getViewManagerConfig = viewManagerName => {
     if (!UIManager.getViewManagerConfig) {
       return UIManager[viewManagerName];
@@ -378,6 +384,7 @@ export default class Video extends Component {
       onPictureInPictureStatusChanged: this._onPictureInPictureStatusChanged,
       onRestoreUserInterfaceForPictureInPictureStop: this._onRestoreUserInterfaceForPictureInPictureStop,
       onReceiveAdEvent: this._onReceiveAdEvent,
+      onActionPress: this._onActionPress,
     });
 
     const posterStyle = {
@@ -566,6 +573,7 @@ Video.propTypes = {
   onExternalPlaybackChange: PropTypes.func,
   adTagUrl: PropTypes.string,
   onReceiveAdEvent: PropTypes.func,
+  onActionPress: PropTypes.func,
 
   /* Required by react-native */
   ...ViewPropTypes,
