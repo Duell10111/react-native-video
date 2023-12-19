@@ -1,16 +1,53 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+
+import 'react-native-url-polyfill/auto';
+import 'event-target-polyfill';
+import 'fast-text-encoding';
+
+import {btoa, atob} from 'react-native-quick-base64';
+
+// Polyfill for youtube.js
+Object.assign(global, {
+  btoa: btoa,
+  atob: atob,
+});
 
 import {ActivityIndicator, StyleSheet} from 'react-native';
+
+import {Innertube} from './ytjs/Youtube';
 
 import Video from 'react-native-video';
 
 export default function App() {
+  const [url, setUrl] = useState<string>();
+
+  useEffect(() => {
+    Innertube.create()
+      .then(innertube => {
+        innertube
+          .getInfo('WwC7jKYUNcA', 'iOS')
+          .then(value => {
+            setUrl(value.streaming_data?.hls_manifest_url ?? undefined);
+          })
+          .catch(console.warn);
+      })
+      .catch(console.warn);
+  }, []);
+
+  if (!url) {
+    console.log('Video still loading');
+    return null;
+  }
+
+  console.log('Video url: ', url);
+
   return (
     <>
       <ActivityIndicator style={styles.activityIndicator} size={'large'} />
       <Video
         source={{
-          uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          uri: url,
+          // uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
           // uri: 'https://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8',
           // type: 'm3u8',
           title: 'Custom Title',
@@ -23,6 +60,7 @@ export default function App() {
         controls
         fullscreen
         resizeMode={'contain'}
+        onError={console.warn}
         chapters={[
           {
             title: 'Chapter 1',
