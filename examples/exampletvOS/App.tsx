@@ -1,16 +1,53 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+
+import 'react-native-url-polyfill/auto';
+import 'event-target-polyfill';
+import 'fast-text-encoding';
+
+import {btoa, atob} from 'react-native-quick-base64';
+
+// Polyfill for youtube.js
+Object.assign(global, {
+  btoa: btoa,
+  atob: atob,
+});
 
 import {ActivityIndicator, StyleSheet} from 'react-native';
+
+import {Innertube} from './ytjs/Youtube';
 
 import Video from 'react-native-video';
 
 export default function App() {
+  const [url, setUrl] = useState<string>();
+
+  useEffect(() => {
+    Innertube.create()
+      .then(innertube => {
+        innertube
+          .getInfo('WwC7jKYUNcA', 'iOS')
+          .then(value => {
+            setUrl(value.streaming_data?.hls_manifest_url ?? undefined);
+          })
+          .catch(console.warn);
+      })
+      .catch(console.warn);
+  }, []);
+
+  if (!url) {
+    console.log('Video still loading');
+    return null;
+  }
+
+  console.log('Video url: ', url);
+
   return (
     <>
       <ActivityIndicator style={styles.activityIndicator} size={'large'} />
       <Video
         source={{
-          uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          uri: 'https://manifest.googlevideo.com/api/manifest/hls_variant/expire/1703025958/ei/xciBZf7nO_aii9oPm8qnwA0/ip/2a01%3Ac22%3A6f0c%3Aa200%3A701d%3A340a%3Ad1ba%3Aa98c/id/5b00bb8ca61435c0/source/youtube/requiressl/yes/xpc/EgVo2aDSNQ%3D%3D/playback_host/rr5---sn-h0jeln7e.googlevideo.com/mh/4D/mm/31%2C26/mn/sn-h0jeln7e%2Csn-4g5lznez/ms/au%2Conr/mv/m/mvi/5/pl/39/hfr/1/demuxed/1/tts_caps/1/maudio/1/initcwndbps/1106250/vprv/1/go/1/mt/1703004068/fvip/1/nvgoi/1/short_key/1/ncsapi/1/keepalive/yes/fexp/24007246/dover/13/itag/0/playlist_type/DVR/sparams/expire%2Cei%2Cip%2Cid%2Csource%2Crequiressl%2Cxpc%2Chfr%2Cdemuxed%2Ctts_caps%2Cmaudio%2Cvprv%2Cgo%2Citag%2Cplaylist_type/sig/AJfQdSswRgIhAOta18Sx7mJ8bOL9p3xpSLgR3Bhb7cmAriDsiEmO8cWFAiEArtSWQiAAeMfLEOkWHyq8I4Rrzqiomc6XwGwPlBUrAVI%3D/lsparams/playback_host%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps/lsig/AAO5W4owRgIhAIYfp9nA4gl3WJgWV6-XvXvfVIi7-q2ErV8QZiXDUkFHAiEAtUC5nL3AQNfXfoxBG6Sjuztqb_inFpjUELVvLJ9l5G8%3D/file/index.m3u8',
+          // uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
           // uri: 'https://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8',
           // type: 'm3u8',
           title: 'Custom Title',
