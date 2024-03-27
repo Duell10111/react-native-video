@@ -537,6 +537,7 @@ export type VideoSaveData = {
 
 export interface VideoManagerType {
   save: (option: object, reactTag: number) => Promise<VideoSaveData>;
+  saveThumbnails: (option: object, reactTag: number) => Promise<VideoSaveData>;
   setPlayerPauseState: (paused: boolean, reactTag: number) => Promise<void>;
   setLicenseResult: (
     result: string,

@@ -1142,6 +1142,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             playerItem: _playerItem
         )
     }
+    
+    @objc
+    func saveThumbnails(options: NSDictionary!, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        RCTVideoSave.saveThumbnails(
+            options: options,
+            resolve: resolve,
+            reject: reject,
+            playerItem: _playerItem
+        )
+    }
 
     func setLicenseResult(_ license: String!, _ licenseUrl: String!) {
         _resouceLoaderDelegate?.setLicenseResult(license, licenseUrl)

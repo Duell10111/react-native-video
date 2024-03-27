@@ -22,6 +22,19 @@ class RCTVideoManager: RCTViewManager {
             }
         }
     }
+    
+    @objc(saveThumbnails:reactTag:resolver:rejecter:)
+    func saveThumbnails(options: NSDictionary, reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        bridge.uiManager.prependUIBlock { _, viewRegistry in
+            let view = viewRegistry?[reactTag]
+            if !(view is RCTVideo) {
+                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
+            } else if let view = view as? RCTVideo {
+                print("Run save thumbnails")
+                view.saveThumbnails(options: options, resolve: resolve, reject: reject)
+            }
+        }
+    }
 
     @objc(setLicenseResult:licenseUrl:reactTag:)
     func setLicenseResult(license: NSString, licenseUrl: NSString, reactTag: NSNumber) {

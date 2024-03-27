@@ -1,14 +1,27 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 
 import {ActivityIndicator, StyleSheet} from 'react-native';
 
 import Video from 'react-native-video';
 
 export default function App() {
+  const ref = useRef()
+
+  useEffect(() => {
+    console.log("Ref ",ref.current)
+    setTimeout(() => {
+      console.log(ref.current?.saveThumbnails)
+      ref.current?.saveThumbnails({
+        times: [1,10,15,20]
+      })?.then(() => console.log("Run")).catch(console.warn)
+    }, 1000)
+  }, []);
+
   return (
     <>
       <ActivityIndicator style={styles.activityIndicator} size={'large'} />
       <Video
+        ref={ref}
         source={{
           uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
           // uri: 'https://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8',

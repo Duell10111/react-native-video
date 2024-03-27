@@ -257,6 +257,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       return VideoManager.save?.(options, getReactTag(nativeRef));
     }, []);
 
+    const saveThumbnails = useCallback((options: object) => {
+      // VideoManager.save can be null on android & windows
+      return VideoManager.saveThumbnails?.(options, getReactTag(nativeRef));
+    }, []);
+
     const pause = useCallback(() => {
       return VideoManager.setPlayerPauseState(true, getReactTag(nativeRef));
     }, []);
@@ -486,6 +491,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         presentFullscreenPlayer,
         dismissFullscreenPlayer,
         save,
+        saveThumbnails,
         pause,
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,
@@ -495,6 +501,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         presentFullscreenPlayer,
         dismissFullscreenPlayer,
         save,
+        saveThumbnails,
         pause,
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,

@@ -74,6 +74,12 @@ RCT_EXTERN_METHOD(save
                   : (RCTPromiseResolveBlock)resolve rejecter
                   : (RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(saveThumbnails
+                  : (NSDictionary*)options reactTag
+                  : (nonnull NSNumber*)reactTag resolver
+                  : (RCTPromiseResolveBlock)resolve rejecter
+                  : (RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(setLicenseResult : (NSString*)license licenseUrl : (NSString*)licenseUrl reactTag : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(setLicenseResultError : (NSString*)error licenseUrl : (NSString*)licenseUrl reactTag : (nonnull NSNumber*)reactTag)

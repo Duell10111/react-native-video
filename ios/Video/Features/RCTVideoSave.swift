@@ -1,6 +1,63 @@
 import AVFoundation
 
 enum RCTVideoSave {
+    
+    static func saveThumbnails(
+        options: NSDictionary!,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock,
+
+        playerItem: AVPlayerItem?
+    ) {
+        let asset: AVAsset! = playerItem?.asset
+
+        guard asset != nil else {
+            reject("ERROR_ASSET_NIL", "Asset is nil", nil)
+            return
+        }
+        
+        var imageGenerator = AVAssetImageGenerator(asset: asset)
+        
+        guard let times = options["times"] as? [Int] else {
+            reject("ERROR_ASSET_NIL", "Times are not set", nil)
+            return
+        }
+        
+        // TODO: Let user choice an image folder for this video or use random string
+        let videoFolder = UUID().uuidString
+        
+        let imageTimes = times.map { seconds in
+            CMTimeMake(value: Int64(seconds), timescale: 1)
+        }
+        let nsValues = imageTimes.map { NSValue(time: $0) }
+        
+        imageGenerator.generateCGImagesAsynchronously(forTimes: nsValues) { requestedTime, img, actTime, result, error in
+            guard let requestImg = img else {
+                return
+            }
+            
+            guard let path = RCTVideoSave.generatePathInDirectory(
+                directory: URL(fileURLWithPath: RCTVideoSave.cacheDirectoryPath() ?? "").appendingPathComponent("Thumbnails/\(videoFolder)").path,
+                withExtension: ".jpg",
+                fName: String(Int(requestedTime.seconds))
+            ) else {
+                return
+            }
+            
+            let fileURL = URL(fileURLWithPath: path)
+            let uiImage = UIImage(cgImage: requestImg)
+            if let imageData = uiImage.pngData() {
+                    // 3. Speichere die Bilddaten im temporären Pfad
+                    do {
+                        try imageData.write(to: fileURL)
+                        print("Bild erfolgreich gespeichert in: \(fileURL.path)")
+                    } catch {
+                        print("Fehler beim Speichern des Bildes: \(error)")
+                    }
+                }
+        }
+    }
+    
     static func save(
         options _: NSDictionary!,
         resolve: @escaping RCTPromiseResolveBlock,
@@ -41,8 +98,8 @@ enum RCTVideoSave {
         })
     }
 
-    static func generatePathInDirectory(directory: String?, withExtension extension: String?) -> String? {
-        let fileName = UUID().uuidString + (`extension` ?? "")
+    static func generatePathInDirectory(directory: String?, withExtension extension: String?, fName: String? = nil) -> String? {
+        let fileName = (fName ?? UUID().uuidString) + (`extension` ?? "")
         RCTVideoSave.ensureDirExists(withPath: directory)
         return URL(fileURLWithPath: directory ?? "").appendingPathComponent(fileName).path
     }
