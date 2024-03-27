@@ -901,6 +901,21 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if #available(tvOS 14.0, *) {
             viewController.allowsPictureInPicturePlayback = true
         }
+        if #available(tvOS 15.0, *) {
+            let label = UILabel(frame: CGRect(x: 0, y: 0, width: 300, height: 300))
+            label.text = "TESTLABEL"
+            let cVC =  UIViewController()
+            cVC.view.frame = self.bounds
+            cVC.view.backgroundColor = .blue
+            //cVC.view.addSubview(label)
+            viewController.customOverlayViewController = cVC
+            
+            let vc = UIViewController()
+            vc.title = "TESTTitle"
+            vc.view.backgroundColor = .yellow
+            
+            viewController.customInfoViewControllers = [vc]
+        }
         return viewController
     }
 
@@ -1022,9 +1037,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - React View Management
 
     func insertReactSubview(view: UIView!, atIndex: Int) {
+        print("TEST   - - -- - - ")
         if _controls {
-            view.frame = self.bounds
-            _playerViewController?.contentOverlayView?.insertSubview(view, at: atIndex)
+            //view.frame = self.bounds
+            if #available(tvOS 15.0, *) {
+                print("CustomOverlayViewController: ", _playerViewController?.customOverlayViewController != nil)
+                //_playerViewController!.customOverlayViewController!.view!.addSubview(view)
+                
+                _playerViewController!.customInfoViewControllers[0].view.addSubview(view)
+            }
         } else {
             RCTLogError("video cannot have any subviews")
         }

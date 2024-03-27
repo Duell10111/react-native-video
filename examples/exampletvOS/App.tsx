@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {ActivityIndicator, StyleSheet} from 'react-native';
+import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
 
 import Video from 'react-native-video';
 
@@ -37,7 +37,12 @@ export default function App() {
             uri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png',
           },
         ]}
-      />
+        muted
+      >
+        <View style={{backgroundColor: "red", width: 500, height: 500, justifyContent: "center"}}>
+          <Text>TESTsssada</Text>
+        </View>
+      </Video>
     </>
   );
 }
